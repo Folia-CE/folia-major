@@ -4,11 +4,16 @@ import { usePlaybackReportReady } from '../../../../services/onlineMusic/playbac
 import { useAudioSettingsStore } from '../../../../stores/useAudioSettingsStore';
 import { usePlayerChromeSettingsStore } from '../../../../stores/usePlayerChromeSettingsStore';
 import { useStageSettingsStore } from '../../../../stores/useStageSettingsStore';
+import { useVideoSettingsStore } from '../../../../stores/useVideoSettingsStore';
+import { useVideoWorkspaceStore } from '../../../../stores/useVideoWorkspaceStore';
+import { closeSettings } from '../../../../stores/useSettingsModalStore';
 import { Button, CopyValue, Group, Reveal, Row, Status, Toggle, Value, type SettingsOptionDef } from '../kit';
 import NavidromeRows from './integration/NavidromeRows';
-import { O, SERVICES, STREAMING } from './integration/options';
+import { LxSourcePanel } from '../../../lxmusic/LxSourcePanel';
+import { O, SERVICES, STREAMING, VIDEO } from './integration/options';
 import { DesktopStageRows, WebStageRows } from './integration/StageModeRows';
 import SyncServerRows from './integration/SyncServerRows';
+import { VideoSourceRows } from './integration/VideoSourceRows';
 import { useSettingsPage } from './settingsPageContext';
 
 // src/components/modal/settings/pages/IntegrationPage.tsx
@@ -35,11 +40,15 @@ const IntegrationPage: React.FC = () => {
     const setScrobbleEnabled = useAudioSettingsStore(state => state.handleToggleNeteaseScrobble);
     // Subscribed to, so the row follows the reporting account signing in or out while the page is open.
     const canScrobble = usePlaybackReportReady();
+    const videoSourceUrl = useVideoSettingsStore(state => state.videoSourceUrl);
 
     return (
         <>
             <Group def={SERVICES}>
                 <NavidromeRows />
+                {/* 洛雪音源：粘贴网址或选 .js / .json 导入音源脚本，导入后洛雪平台就能取播放地址。
+                    洛雪本身免登录，选中它以后首页搜索、歌单广场、榜单与其它平台走同一套流程。 */}
+                <LxSourcePanel />
                 <SyncServerRows />
                 {isElectron && (
                     <>
@@ -68,9 +77,9 @@ const IntegrationPage: React.FC = () => {
             </Group>
 
             <Group def={STREAMING}>
-                <Row option={O.transparentBackground} hint={t('options.transparentPlayerBackgroundDesc')}>
+                {/* <Row option={O.transparentBackground} hint={t('options.transparentPlayerBackgroundDesc')}>
                     <Toggle checked={transparentPlayerBackground} onChange={onToggleTransparentPlayerBackground} />
-                </Row>
+                </Row> */}
                 {isElectron && obs && (
                     <>
                         <Row option={O.obs} hint={t('options.obsBrowserSourceDesc')}>
@@ -124,6 +133,22 @@ const IntegrationPage: React.FC = () => {
                     </>
                 )}
                 {isElectron ? <DesktopStageRows /> : <WebStageRows />}
+            </Group>
+
+            {/* 影视：第三颗页签（服务 | 直播与舞台 | 影视）。一份配置地址，影视入口、首页推荐与搜索都从这里取片源。 */}
+            <Group def={VIDEO}>
+                <VideoSourceRows />
+                {/* 影视工作台随时能进：地址没填时它自己落内置源，不该把入口锁死。 */}
+                <Row sub label={t('options.videoWorkspaceOpen')} hint={videoSourceUrl ? undefined : t('options.videoSourceNotConfigured')}>
+                    <Button
+                        onClick={() => {
+                            useVideoWorkspaceStore.getState().setOpen(true);
+                            closeSettings();
+                        }}
+                    >
+                        {t('options.settingsHeadingVideo')}
+                    </Button>
+                </Row>
             </Group>
         </>
     );

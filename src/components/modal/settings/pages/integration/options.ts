@@ -7,6 +7,7 @@ import { option, type SettingsGroupDef } from '../../kit';
 
 export const SERVICES: SettingsGroupDef = { id: 'services', titleKey: 'options.settingsHeadingServices' };
 export const STREAMING: SettingsGroupDef = { id: 'streaming', titleKey: 'options.settingsHeadingStreaming' };
+export const VIDEO: SettingsGroupDef = { id: 'video', titleKey: 'options.settingsHeadingVideo' };
 
 
 export const O = {
@@ -29,4 +30,5 @@ export const O = {
     playerCapPlayer: option(STREAMING, 'playerCapPlayer', 'options.playerCapPlayer'),
     playerCapTimeline: option(STREAMING, 'playerCapTimeline', 'options.playerCapTimeline'),
     playerCapIgnoreClear: option(STREAMING, 'playerCapIgnoreClear', 'options.playerCapIgnoreClear'),
+    videoSource: option(VIDEO, 'videoSourceUrl', 'options.videoSourceUrl'),
 };

@@ -1,12 +1,14 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Search } from 'lucide-react';
+import { Film, Search } from 'lucide-react';
 import type { OnlineProviderId, ProviderAccountSummary } from '../../../types/onlineMusic';
 import { providerDisplayName } from '../../../i18n/providerName';
 import { Tooltip } from '../../modal/settings/kit';
 import { AccountPicture, PlatformMark, platformMarkOf } from '../PlatformMark';
 import { rowStatus, type RowStatus } from '../platformRows';
 import { filterRows } from './loginView';
+import { closeLoginWindow } from '../loginWindowStore';
+import { useVideoWorkspaceStore } from '../../../stores/useVideoWorkspaceStore';
 
 // src/components/login/window/PlatformColumn.tsx
 // 登录窗口里平台的那一列：每个平台一行（记号、名字和它下面的登录状态、已登录的头像），各行平分列的高，
@@ -16,6 +18,12 @@ import { filterRows } from './loginView';
 
 /** 从这么多个平台起有搜索框。 */
 const SEARCH_FROM = 12;
+
+/**
+ * 列表顶部那一行「影视」的假 id：它不是在线平台，却要跟平台们一样能被高亮块滑到、
+ * 被方向键走到、被回车确认，所以进导航时给它一个不会和 providerId 撞的记号。
+ */
+const VIDEO_ROW_ID = '__video__';
 
 /**
  * 竖着的那一列里一行的高：平台们平分列的高，每行在 46 到 68 之间。平台少时行到 68 就不再长，下面留空；
@@ -82,20 +90,26 @@ export const PlatformColumn: React.FC<PlatformColumnProps> = ({ rows, chosenId, 
     const [query, setQuery] = useState('');
     const shown = rows.length >= SEARCH_FROM ? filterRows(rows, query, row => providerDisplayName(t, row)) : rows;
     // 高亮在哪一行：指针或方向键指着的；都没有指着就是选中的那一行。
-    const [pointed, setPointed] = useState<OnlineProviderId | null>(null);
-    const lit = shown.find(row => row.providerId === pointed) ?? shown.find(row => row.providerId === chosenId) ?? null;
+    // 它可能停在那行「影视」上，所以类型是 string（行 id），不只是在线的 providerId。
+    const [pointed, setPointed] = useState<string | null>(null);
+    const litId = pointed ?? chosenId ?? null;
+    const lit = litId && litId !== VIDEO_ROW_ID ? shown.find(row => row.providerId === litId) ?? null : null;
     const listRef = useRef<HTMLDivElement>(null);
     const [box, setBox] = useState<Box | null>(null);
     // 列表的哪一头后面还有行：那一头淡出。
     const [more, setMore] = useState({ before: false, after: false });
-    const rowOf = (providerId: OnlineProviderId | null | undefined) => (
-        providerId ? listRef.current?.querySelector<HTMLElement>(`[data-row="${CSS.escape(providerId)}"]`) ?? null : null
+    const rowOf = (id: string | null | undefined) => (
+        id ? listRef.current?.querySelector<HTMLElement>(`[data-row="${CSS.escape(id)}"]`) ?? null : null
     );
+    const openVideoWorkspace = () => {
+        closeLoginWindow();
+        useVideoWorkspaceStore.getState().setOpen(true);
+    };
 
     // 高亮那一块的位置和大小，每次画完从它所在的行量一遍（行的宽度跟着名字、头像和语言变）；数没变就不动。
     useLayoutEffect(() => {
         const list = listRef.current;
-        const row = rowOf(lit?.providerId);
+        const row = rowOf(litId);
         const next = list && row ? measureRow(list, row) : null;
         setBox(current => (sameBox(current, next) ? current : next));
     });
@@ -141,22 +155,27 @@ export const PlatformColumn: React.FC<PlatformColumnProps> = ({ rows, chosenId, 
     const handleKeyDown = (event: React.KeyboardEvent) => {
         // 搜索框里左右键、Home、End 和空格是打字用的，不是移动高亮。
         const inField = event.target instanceof HTMLInputElement;
-        const choosable = shown.filter(canChoose);
-        const at = lit ? choosable.findIndex(row => row.providerId === lit.providerId) : -1;
+        // 能走到的行：先是顶上那行「影视」，再是能选的平台（够不着的平台跳过）。
+        const navIds = [VIDEO_ROW_ID, ...shown.filter(canChoose).map(row => row.providerId)];
+        const at = litId ? navIds.indexOf(litId) : -1;
         const to = event.key === 'ArrowDown' || (!inField && event.key === 'ArrowRight') ? at + 1
             : event.key === 'ArrowUp' || (!inField && event.key === 'ArrowLeft') ? at - 1
-                : inField ? null : event.key === 'Home' ? 0 : event.key === 'End' ? choosable.length - 1 : null;
+                : inField ? null : event.key === 'Home' ? 0 : event.key === 'End' ? navIds.length - 1 : null;
         if (to !== null) {
-            const next = choosable[Math.max(0, Math.min(choosable.length - 1, to))];
+            const next = navIds[Math.max(0, Math.min(navIds.length - 1, to))];
             if (next) {
-                setPointed(next.providerId);
+                setPointed(next);
                 // 键盘移过去的行要看得见。
-                rowOf(next.providerId)?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+                rowOf(next)?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
             }
             event.preventDefault();
         } else if (event.key === 'Enter' || (!inField && event.key === ' ')) {
-            const target = lit ?? shown.find(canChoose);
-            if (target && canChoose(target)) onChoose(target);
+            const target = litId ?? navIds[0];
+            if (target === VIDEO_ROW_ID) openVideoWorkspace();
+            else {
+                const row = shown.find(item => item.providerId === target);
+                if (row && canChoose(row)) onChoose(row);
+            }
             event.preventDefault();
         }
     };
@@ -186,7 +205,7 @@ export const PlatformColumn: React.FC<PlatformColumnProps> = ({ rows, chosenId, 
                 role="listbox"
                 tabIndex={0}
                 aria-label={t('home.onlineProvider')}
-                aria-activedescendant={lit ? `login-row-${lit.providerId}` : undefined}
+                aria-activedescendant={litId ? `login-row-${litId}` : undefined}
                 onKeyDown={handleKeyDown}
                 onScroll={readMore}
                 onMouseLeave={() => setPointed(null)}
@@ -198,12 +217,36 @@ export const PlatformColumn: React.FC<PlatformColumnProps> = ({ rows, chosenId, 
                     className="st-t-move pointer-events-none absolute left-0 top-0 rounded-lg bg-[var(--st-fill2)] transition-[transform,width,opacity]"
                     style={box ? { width: box.w, height: box.h, transform: `translate(${box.x}px, ${box.y}px)`, opacity: 1 } : { opacity: 0 }}
                 />
+                {/* 影视入口：不是在线平台，是这个列表顺带给出的一个去处。点它关掉窗口，直接开影视工作台。
+                    它跟平台共用同一条高亮块和同一条方向键路径，看起来就是列表里的第一行。 */}
+                <div
+                    id={`login-row-${VIDEO_ROW_ID}`}
+                    data-row={VIDEO_ROW_ID}
+                    role="option"
+                    aria-selected={litId === VIDEO_ROW_ID}
+                    aria-label="影视 · 看片，打开影视工作台"
+                    onMouseEnter={() => setPointed(VIDEO_ROW_ID)}
+                    onClick={openVideoWorkspace}
+                    className={`st-t-fast relative flex cursor-pointer items-center rounded-lg transition-colors ${litId === VIDEO_ROW_ID ? 'text-[color:var(--st-t1)]' : 'text-[color:var(--st-t2)]'} hover:text-[color:var(--st-t1)] ${lie === 'column' ? `${ROW_SIZE} w-full gap-3 px-2.5` : 'h-9 max-w-[168px] shrink-0 gap-2.5 px-2'}`}
+                >
+                    <span className={`flex shrink-0 items-center justify-center rounded-full bg-[#6f5bf0] text-white ${lie === 'column' ? 'h-[30px] w-[30px]' : 'h-[22px] w-[22px]'}`}>
+                        <Film size={lie === 'column' ? 16 : 12} />
+                    </span>
+                    {lie === 'column' ? (
+                        <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+                            <span className="truncate text-[13px] font-medium leading-[18px]">影视</span>
+                            <span className="truncate text-[11.5px] leading-4 text-[color:var(--st-t3)]">看片 · 打开影视工作台</span>
+                        </span>
+                    ) : (
+                        <span className="min-w-0 flex-1 truncate text-[13px]">影视</span>
+                    )}
+                </div>
                 {shown.map(row => {
                     const status = rowStatus(row);
                     const state = stateText(status, row.availability.messageKey);
                     const name = providerDisplayName(t, row);
                     const chosen = row.providerId === chosenId;
-                    const bright = chosen || row.providerId === lit?.providerId;
+                    const bright = chosen || row.providerId === litId;
                     const tall = lie === 'column';
                     const item = (
                         <div
