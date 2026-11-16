@@ -3,20 +3,21 @@
 >
 > 本仓库是 [chthollyphile/folia-major](https://github.com/chthollyphile/folia-major) 的个人 fork，仅供本人自用与实机测试，**不是官方版本**，与原作者及官方站点无关。
 >
-> **最新构建**：`v0.7.29-video-immersive` → [下载 Folia-Setup-0.7.29.exe](https://github.com/Folia-CE/folia-major-baixiao0919/releases/download/v0.7.29-video-immersive/Folia-Setup-0.7.29.exe)（271 MB，Windows）
+> **最新构建**：`v0.7.28-lizi68` → [下载 Folia-Setup-0.7.28-lizi68.exe](https://github.com/Folia-CE/folia-major-baixiao0919/releases/download/v0.7.28-lizi68/Folia-Setup-0.7.28-lizi68.exe)（304 MB，Windows）
 >
 > **相对官方的自研改动**
 > - 洛雪音源：网易云 / QQ / 酷狗 / 酷我 / 咪咕 / 汽水 六家聚合
 > - 液态玻璃 UI 与配套设置项
 > - 局域网 DLNA 投送 + 音响遥控
 > - 文字 PV 歌词样式、内置歌词样式（黑胶 / 跳一跳 / 52Hz / 虹光）
+- **LIZI 68 舞台**：内置 `lizi-stages` 模组，68 个可视化歌词舞台直接进「设置 → 外观 → 歌词动画样式」（样式总数 24 → 92）
 > - 六档音质选择
 > - 飞牛音乐（fnmusic）桥
 > - **影视工作台**：登录窗口左侧「影视」入口，3D 海报卡片流 + 详情 + 选集 + 播放器，配色与 Folia 本体一致
 > - **沉浸式播放层**：单击停/播、双击全屏、Esc 逐级返回、控制条 3 秒自动淡出、右键菜单含画质增强，融合 PotPlayer / mpv / YouTube / IINA 键位（F1 可查一览）
 > - **TVBox 配置兼容**：请求伪装 `okhttp/3.15` 客户端、配置支持整段 base64 解包与多仓 `urls` 合并
 >
-> **源码**：[video-immersive-0.7.29 分支](https://github.com/Folia-CE/folia-major-baixiao0919/tree/video-immersive-0.7.29) 含上述自研代码（影视模块说明见 [docs/video-immersive.md](docs/video-immersive.md)）；窄屏一体胶囊、场景引擎等为**官方功能**，随上游同步，不是本仓库实现。
+> **源码**：[lizi68-0.7.28 分支](https://github.com/Folia-CE/folia-major-baixiao0919/tree/lizi68-0.7.28)（版本号固定 0.7.28，不跟随上游） 含上述自研代码（影视模块说明见 [docs/video-immersive.md](docs/video-immersive.md)）；窄屏一体胶囊、场景引擎等为**官方功能**，随上游同步，不是本仓库实现。
 >
 > **安装包**统一发布在本仓库 [Releases](https://github.com/Folia-CE/folia-major-baixiao0919/releases)，仅供本人留档。**使用中遇到问题**请回到官方仓库 / 官方站点，不要以本仓库为准。
 
