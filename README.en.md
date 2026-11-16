@@ -3,7 +3,7 @@
 >
 > This repository is a personal fork of [chthollyphile/folia-major](https://github.com/chthollyphile/folia-major), kept only for my own use and on-device testing. It is **not an official release** and is not affiliated with the upstream author or the official site.
 >
-> **Latest build**: `v0.7.28-lx39` → [download Folia-Setup-0.7.28.exe](https://github.com/baixiao0919/folia-major/releases/download/v0.7.28-lx39/Folia-Setup-0.7.28.exe) (265 MB, Windows)
+> **Latest build**: `v0.7.29-video-immersive` → [download Folia-Setup-0.7.29.exe](https://github.com/Folia-CE/folia-major-baixiao0919/releases/download/v0.7.29-video-immersive/Folia-Setup-0.7.29.exe) (271 MB, Windows)
 >
 > **Personal additions on top of upstream**
 > - lxmusic (Luoxue) sources: NetEase / QQ / Kugou / Kuwo / Migu / Qishui aggregation
@@ -12,10 +12,13 @@
 > - text-PV lyric style, built-in lyric styles (vinyl / jump / 52Hz / aurora)
 > - six quality tiers
 > - fnmusic (Feiniu Music) bridge
+> - **Video workspace**: a "Video" row in the login window's platform list, with a 3D poster card wall, detail page, episode picker and player, themed like Folia itself
+> - **Immersive player**: single click play/pause, double click fullscreen, Esc steps back, control bar fades after 3 s, right-click menu with picture enhancement, key bindings merged from PotPlayer / mpv / YouTube / IINA (press F1 for the list)
+> - **TVBox config compatibility**: requests impersonate the `okhttp/3.15` client; configs support whole-text base64 decoding and multi-warehouse `urls` merging
 >
-> **Source**: the [self-build branch](https://github.com/baixiao0919/folia-major/tree/self-build) holds the code above. The compact capsule, scene engine and other core features are **upstream's own** and arrive via sync, not from this repo.
+> **Source**: the [video-immersive-0.7.29 branch](https://github.com/Folia-CE/folia-major-baixiao0919/tree/video-immersive-0.7.29) holds the code above (see [docs/video-immersive.md](docs/video-immersive.md)). The compact capsule, scene engine and other core features are **upstream's own** and arrive via sync, not from this repo.
 >
-> **Installers** are published under this repo's [Releases](https://github.com/baixiao0919/folia-major/releases) for personal archival only. **For support**, please refer to the official repository / official site rather than this fork.
+> **Installers** are published under this repo's [Releases](https://github.com/Folia-CE/folia-major-baixiao0919/releases) for personal archival only. **For support**, please refer to the official repository / official site rather than this fork.
 
 ---
 
