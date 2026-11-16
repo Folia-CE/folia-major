@@ -17,6 +17,8 @@ interface BuiltinModSource {
     /** 实验接口的 opt-in，和 mod.json 的 `experimental` 同义。 */
     experimental?: string[];
     folia: string | null;
+    /** 预览图文件名，默认 preview.jpg；随包带来的非 jpg 预览在这里写明。 */
+    preview?: string;
 }
 
 /**
@@ -75,6 +77,16 @@ const BUILTIN_SOURCES: readonly BuiltinModSource[] = [
         permissions: [],
         folia: null,
     },
+    {
+        id: 'lizi-stages',
+        name: 'LIZI 舞台 · 68 形态',
+        version: '1.0.0',
+        author: 'LIZI',
+        description: 'LIZI 粒子播放器的 68 个可视化歌词舞台全量搬入：每个舞台仍是它自己那张单文件页面，跑在 iframe 里，画布、滤镜、逐字动画与本地参数一概不改，在歌词样式里逐个切换。',
+        permissions: [],
+        folia: null,
+        preview: 'preview.png',
+    },
 ];
 
 /** 内置模组的清单项：字段与主进程给的 `ModRuntimeInfo` 同形，只是客户端地址是同源静态地址。 */
@@ -103,7 +115,7 @@ export const builtinModRuntimeInfos = (): ModRuntimeInfo[] => BUILTIN_SOURCES.ma
 export const builtinModPreviewUrl = (modId: string): string | null => {
     const source = BUILTIN_SOURCES.find(item => item.id === modId);
     if (!source) return null;
-    const name = modId === 'visualizer-jump' ? 'preview.webp' : 'preview.jpg';
+    const name = source.preview ?? (modId === 'visualizer-jump' ? 'preview.webp' : 'preview.jpg');
     return `${BUILTIN_BASE}/${source.id}/${name}`;
 };
 
